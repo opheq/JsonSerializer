@@ -1,6 +1,6 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Globalization;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace JsonSerialization
 {
@@ -34,14 +34,26 @@ namespace JsonSerialization
             {
                 clients.Add(CreateNewRandomPerson(i, ref i, ref personCount));
             }
-            Console.WriteLine($"Generation {PersonCount} persons completed. Full count with children is {personCount}");
+            Console.WriteLine($"Generation {clients.Count} persons completed. Full count with children is {personCount}");
+            string fileName = $"C:\\Users\\ouch\\Desktop\\Persons.json";
+            var options = new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                Converters = { new LongToStringConverter() }
+            };
+            using FileStream createStream = File.Create(fileName);
+            JsonSerializer.Serialize(createStream, clients, options);
+            createStream.Dispose();
         }
+
+       
 
         private Person CreateNewRandomPerson(int id,ref int iterator, ref int personCount)
         {
             Person person = new Person(
                 id,
-                new Guid(),
+                Guid.NewGuid(),       
                 GetRandomFirstName(),
                 GetRandomLastName(),
                 id,
@@ -76,7 +88,7 @@ namespace JsonSerialization
         {
             int count = Rand.Next(1, 6);
             return Enumerable.Range(1, count)
-             .Select(x => new string(Enumerable.Repeat(Numbers, 12)
+             .Select(x => new string(Enumerable.Repeat(Numbers, 16)
               .Select(s => s[Rand.Next(s.Length)]).ToArray()))
              .ToArray();
         }
@@ -95,14 +107,13 @@ namespace JsonSerialization
             return phones;
         }
 
-        private Int64 GetRandomBirthDate(int minYear, int maxYear)
+        private Int64 GetRandomBirthDate(int minYear = 1930, int maxYear = 2000)
         {
-            int year = Rand.Next(1930, 2000);
+            int year = Rand.Next(minYear, maxYear);
             int month = Rand.Next(1, 13);
             int day = Rand.Next(1, DateTime.DaysInMonth(year, month) + 1);
             DateTime date = new DateTime(year, month, day);
-            long result = date.Ticks;
-
+            long result = date.ToBinary();
             return result;
         }
 
@@ -119,7 +130,7 @@ namespace JsonSerialization
             for(int i = 0; i < count; i++)
             {
                 children[i] = new Child(
-                    id,
+                    id + i + 1,
                     GetRandomFirstName(),
                     GetRandomLastName(),
                     GetRandomBirthDate(DateTime.FromBinary(parent.BirthDate).Year + 18, MaxYear + 23),
@@ -131,6 +142,53 @@ namespace JsonSerialization
         }
     }
 
+    public class LongToStringConverter : JsonConverter<Int64>
+    {
+        private const string DateFormat = "yyyy-MM-dd";
+
+        public override long Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            string dateString = reader.GetString();
+            DateTime dateTime = DateTime.ParseExact(dateString, DateFormat, CultureInfo.InvariantCulture);
+            return dateTime.ToBinary();
+        }
+
+        public override void Write(Utf8JsonWriter writer, long value, JsonSerializerOptions options)
+        {
+            DateTime dateTime = DateTime.FromBinary(value);
+            writer.WriteStringValue(dateTime.ToString(DateFormat));
+        }
+    }
+
+    public class GenderToStringConverter : JsonConverter<Gender>
+    {
+        public override Gender Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            return reader.GetString() == "Male" ? Gender.Male : Gender.Female;
+        }
+
+        public override void Write(Utf8JsonWriter writer, Gender value, JsonSerializerOptions options)
+        {
+            writer.WriteStringValue(value == Gender.Male ? "Male" : "Female");
+        }
+    }
+
+    public class CreditCardConverter : JsonConverter<String[]>
+    {
+        public override string[] Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            string jsonString = reader.GetString();
+            string[] cardNumbers = jsonString.Split(new[] { '-' }, StringSplitOptions.RemoveEmptyEntries);
+            return cardNumbers;
+        }
+
+        public override void Write(Utf8JsonWriter writer, string[] value, JsonSerializerOptions options)
+        {
+            string jsonString = string.Join("-", value);
+            writer.WriteStringValue(jsonString);
+        }
+    }
+
     class Person
     {
         public Int32 Id { get; set; }
@@ -138,12 +196,15 @@ namespace JsonSerialization
         public String FirstName { get; set; }
         public String LastName { get; set; }
         public Int32 SequenceId { get; set; }
+        [JsonConverter(typeof(CreditCardConverter))]
         public String[] CreditCardNumbers { get; set; }
         public Int32 Age { get; set; }
         public String[] Phones { get; set; }
+        [JsonConverter(typeof(LongToStringConverter))]
         public Int64 BirthDate { get; set; }
         public Double Salary { get; set; }
         public Boolean IsMarred { get; set; }
+        [JsonConverter(typeof(GenderToStringConverter))]
         public Gender Gender { get; set; }
         public Child[] Children { get; set; }
 
@@ -171,7 +232,9 @@ namespace JsonSerialization
         public Int32 Id { get; set; }
         public String FirstName { get; set; }
         public String LastName { get; set; }
+        [JsonConverter(typeof(LongToStringConverter))]
         public Int64 BirthDate { get; set; }
+        [JsonConverter(typeof(GenderToStringConverter))]
         public Gender Gender { get; set; }
 
         public Child(Int32 id, String firstName, String lastName, Int64 birthDate, Gender gender)
@@ -184,7 +247,7 @@ namespace JsonSerialization
         }
     }
 
-    enum Gender
+    public enum Gender
     {
         Male,
         Female
