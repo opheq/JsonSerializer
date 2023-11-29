@@ -46,14 +46,14 @@ namespace JsonSerialization
 
         #region GenerateRandomMethods
 
-        private Person CreateNewRandomPerson(int id, ref int iterator, ref int personCount)
+        private Person CreateNewRandomPerson(ref int iterator, ref int personCount)
         {
             Person person = new(
-                id,
+                iterator,
                 Guid.NewGuid(),
                 GenerateRandomFirstName(),
                 GenerateRandomLastName(),
-                id,
+                iterator,
                 GenerateRandomCreditCardNumbers(),
                 GenerateRandomPhones(),
                 GenerateRandomBirthDate(MinYear, MaxYear),
@@ -146,7 +146,7 @@ namespace JsonSerialization
             Console.WriteLine($"Start generation {PersonCount} persons");
             for (int i = 0; i < personCount; i++)
             {
-                _persons.Add(CreateNewRandomPerson(i, ref i, ref personCount));
+                _persons.Add(CreateNewRandomPerson(ref i, ref personCount));
             }
             Console.WriteLine($"Generation {_persons.Count} persons completed. Full count with children is {personCount}");
         }
