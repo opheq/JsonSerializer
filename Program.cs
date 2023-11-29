@@ -153,7 +153,7 @@ namespace JsonSerialization
 
         public void Serialize()
         {
-            string fileName = $"C:\\Users\\ouch\\Desktop\\Persons.json";
+            string fileName = $"C:\\Users\\{Environment.UserName}\\Desktop\\Persons.json";
             using FileStream createStream = File.Create(fileName);
             JsonSerializer.Serialize(createStream, _persons, _jsonOptions);
             createStream.Dispose();
@@ -163,7 +163,7 @@ namespace JsonSerialization
 
         public void Deserialize()
         {
-            string fileName = $"C:\\Users\\ouch\\Desktop\\Persons.json";
+            string fileName = $"C:\\Users\\{Environment.UserName}\\Desktop\\Persons.json";
             using FileStream readStream = File.OpenRead(fileName);
             _persons = JsonSerializer.Deserialize<List<Person>>(readStream, _jsonOptions);
             readStream.Dispose();
