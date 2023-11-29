@@ -70,21 +70,21 @@ namespace JsonSerialization
             return person;
         }
 
-        private String GetRandomFirstName()
+        private string GetRandomFirstName()
         {
             int length = Rand.Next(3, 11);
             return new string(Enumerable.Repeat(Letters, length)
              .Select(s => s[Rand.Next(s.Length)]).ToArray());
         }
 
-        private String GetRandomLastName()
+        private string GetRandomLastName()
         {
             int length = Rand.Next(3, 11);
             return new string(Enumerable.Repeat(Letters, length)
              .Select(s => s[Rand.Next(s.Length)]).ToArray());
         }
 
-        private String[] GetRandomCreditCardNumbers()
+        private string[] GetRandomCreditCardNumbers()
         {
             int count = Rand.Next(1, 6);
             return Enumerable.Range(1, count)
@@ -93,9 +93,9 @@ namespace JsonSerialization
              .ToArray();
         }
 
-        private Int32 GetRandomAge() => Rand.Next(18, 99);
+        private int GetRandomAge() => Rand.Next(18, 99);
 
-        private String[] GetRandomPhones()
+        private string[] GetRandomPhones()
         {
             int length = Rand.Next(0, 6);
             string[] phones = new string[length];
@@ -107,7 +107,7 @@ namespace JsonSerialization
             return phones;
         }
 
-        private Int64 GetRandomBirthDate(int minYear = 1930, int maxYear = 2000)
+        private long GetRandomBirthDate(int minYear = 1930, int maxYear = 2000)
         {
             int year = Rand.Next(minYear, maxYear);
             int month = Rand.Next(1, 13);
@@ -117,9 +117,9 @@ namespace JsonSerialization
             return result;
         }
 
-        private Double GetRandomSalary() => Math.Round(Rand.NextDouble() * 10000, 1);
+        private double GetRandomSalary() => Math.Round(Rand.NextDouble() * 10000, 1);
 
-        private Boolean GetRandomIsMarred() => Rand.Next(0,2) == 1 ? true : false;
+        private bool GetRandomIsMarred() => Rand.Next(0,2) == 1 ? true : false;
 
         private Gender GetRandomGender() => Rand.Next(0,2) == 1 ? Gender.Male : Gender.Female;
 
@@ -142,7 +142,7 @@ namespace JsonSerialization
         }
     }
 
-    public class LongToStringConverter : JsonConverter<Int64>
+    public class LongToStringConverter : JsonConverter<long>
     {
         private const string DateFormat = "yyyy-MM-dd";
 
@@ -173,7 +173,7 @@ namespace JsonSerialization
         }
     }
 
-    public class CreditCardConverter : JsonConverter<String[]>
+    public class CreditCardConverter : JsonConverter<string[]>
     {
         public override string[] Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
@@ -191,25 +191,25 @@ namespace JsonSerialization
 
     class Person
     {
-        public Int32 Id { get; set; }
+        public int Id { get; set; }
         public Guid TransportId { get; set; }
-        public String FirstName { get; set; }
-        public String LastName { get; set; }
-        public Int32 SequenceId { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public int SequenceId { get; set; }
         [JsonConverter(typeof(CreditCardConverter))]
-        public String[] CreditCardNumbers { get; set; }
-        public Int32 Age { get; set; }
-        public String[] Phones { get; set; }
+        public string[] CreditCardNumbers { get; set; }
+        public int Age { get; set; }
+        public string[] Phones { get; set; }
         [JsonConverter(typeof(LongToStringConverter))]
-        public Int64 BirthDate { get; set; }
-        public Double Salary { get; set; }
-        public Boolean IsMarred { get; set; }
+        public long BirthDate { get; set; }
+        public double Salary { get; set; }
+        public bool IsMarred { get; set; }
         [JsonConverter(typeof(GenderToStringConverter))]
         public Gender Gender { get; set; }
         public Child[] Children { get; set; }
 
-        public Person(Int32 id, Guid transportId, String firstName, String lastName, Int32 sequenceId, String[] creditCardNumbers, 
-            Int32 age, String[] phones, Int64 birthDate, Double salary, Boolean isMarred, Gender gender, Child[] children)
+        public Person(int id, Guid transportId, string firstName, string lastName, int sequenceId, string[] creditCardNumbers,
+            int age, string[] phones, long birthDate, double salary, bool isMarred, Gender gender, Child[] children)
         {
             Id = id;
             TransportId = transportId;
@@ -229,15 +229,15 @@ namespace JsonSerialization
 
     class Child
     {
-        public Int32 Id { get; set; }
-        public String FirstName { get; set; }
-        public String LastName { get; set; }
+        public int Id { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
         [JsonConverter(typeof(LongToStringConverter))]
-        public Int64 BirthDate { get; set; }
+        public long BirthDate { get; set; }
         [JsonConverter(typeof(GenderToStringConverter))]
         public Gender Gender { get; set; }
 
-        public Child(Int32 id, String firstName, String lastName, Int64 birthDate, Gender gender)
+        public Child(int id, string firstName, string lastName, long birthDate, Gender gender)
         {
             Id = id;
             FirstName = firstName;
